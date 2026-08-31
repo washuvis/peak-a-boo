@@ -11,10 +11,12 @@ PEAK_COLUMNS = ["peak_id", "sample_idx", "time", "height", "prominence", "width_
 
 
 def empty_peak_table() -> pd.DataFrame:
+    """Return an empty peak table with the columns expected by the rest of the pipeline."""
     return pd.DataFrame(columns=PEAK_COLUMNS)
 
 
 def _peak_features(t: np.ndarray, y_smooth: np.ndarray, peak_idx: np.ndarray, props: dict) -> pd.DataFrame:
+    """Compute time, height, prominence, and width for detected peak indexes."""
     peak_idx = np.asarray(peak_idx, dtype=int)
     if peak_idx.size == 0:
         return empty_peak_table()
@@ -26,6 +28,7 @@ def _peak_features(t: np.ndarray, y_smooth: np.ndarray, peak_idx: np.ndarray, pr
 
 
 def deduplicate_peaks(peaks: pd.DataFrame, tolerance: int) -> pd.DataFrame:
+    """Merge nearby duplicate detections by keeping the most prominent candidate in each group."""
     if peaks.empty:
         return peaks.copy()
     peaks = peaks.sort_values("sample_idx").reset_index(drop=True)
@@ -44,6 +47,7 @@ def deduplicate_peaks(peaks: pd.DataFrame, tolerance: int) -> pd.DataFrame:
 
 
 def detect_peaks_global(t: np.ndarray, y_raw: np.ndarray, preprocessing: PreprocessingConfig, detection: DetectionConfig, sigma_t: np.ndarray) -> tuple[np.ndarray, pd.DataFrame]:
+    """Run the fixed global-prominence baseline detector and return its peak table."""
     y_smooth = moving_average(y_raw, preprocessing.smooth_window)
     kwargs: dict[str, object] = {"distance": max(1, int(detection.distance))}
     if detection.global_prominence is not None:
@@ -67,6 +71,7 @@ def detect_peaks_global(t: np.ndarray, y_raw: np.ndarray, preprocessing: Preproc
 
 
 def detect_peaks_segmented_from_smooth(t: np.ndarray, y_raw: np.ndarray, y_smooth: np.ndarray, sigma_t: np.ndarray, segmentation: SegmentationConfig, detection: DetectionConfig) -> tuple[list[Segment], pd.DataFrame, pd.DataFrame]:
+    """Detect peaks in overlapping local regions using prominence scaled by local noise."""
     segments = make_segments(t, y_smooth, segmentation)
     peak_rows: list[dict] = []
     segment_rows: list[dict] = []
