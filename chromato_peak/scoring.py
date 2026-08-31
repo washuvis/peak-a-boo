@@ -7,6 +7,7 @@ from .config import ScoringConfig, StabilityConfig
 
 
 def add_weber_scores(peaks: pd.DataFrame, config: ScoringConfig) -> pd.DataFrame:
+    """Add prominence-to-noise detectability, boundary margin, and uncertainty columns."""
     out = peaks.copy()
     if out.empty:
         for col in ["weber_score", "weber_margin", "decision_uncertainty"]:
@@ -23,6 +24,12 @@ def add_weber_scores(peaks: pd.DataFrame, config: ScoringConfig) -> pd.DataFrame
 
 
 def compute_peak_stability(y_raw: np.ndarray, sigma_t: np.ndarray, reference_peaks: pd.DataFrame, detector: Callable[[np.ndarray], pd.DataFrame], config: StabilityConfig) -> np.ndarray:
+    """Estimate how often each candidate is recovered after noise-scaled perturbations.
+
+    For each perturbation run, Gaussian noise is scaled by the local ``sigma_t``
+    estimate. A candidate counts as recovered when a rerun detection falls within
+    ``match_tolerance_samples`` of its original sample index.
+    """
     if reference_peaks.empty:
         return np.array([], dtype=float)
     if config.n_runs <= 0:
@@ -41,6 +48,7 @@ def compute_peak_stability(y_raw: np.ndarray, sigma_t: np.ndarray, reference_pea
 
 
 def stability_label(value: float) -> str:
+    """Convert a numeric perturbation-recovery rate into a plain-language label."""
     if not np.isfinite(value):
         return "Not computed"
     if value >= 0.80:
