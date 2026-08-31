@@ -28,6 +28,7 @@ FEATURE_COLUMNS = [
 
 
 def feature_table(result) -> pd.DataFrame:
+    """Convert one pipeline result into the feature table used by the demo classifier."""
     peaks = result.final_peaks.copy().sort_values("sample_idx").reset_index(drop=True)
     if peaks.empty:
         return peaks
@@ -60,6 +61,7 @@ def feature_table(result) -> pd.DataFrame:
 
 
 def main() -> None:
+    """Train and save the optional Random Forest classifier using only synthetic data."""
     tables = [feature_table(run_pipeline(H5_PATH, REFERENCE_PATH, channel)) for channel in list_h5_channels(H5_PATH)]
     data = pd.concat(tables, ignore_index=True)
     X = data[FEATURE_COLUMNS].replace([np.inf, -np.inf], np.nan).fillna(0.0)
