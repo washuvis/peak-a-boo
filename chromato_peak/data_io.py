@@ -13,6 +13,7 @@ REFERENCE_SHEET = "reference_peaks"
 
 
 def resolve_existing_file(filename: str, explicit_path: str | Path | None = None, extra_candidates: Sequence[str | Path] | None = None) -> Optional[Path]:
+    """Find a named input file in user-supplied locations and common data directories."""
     candidates: list[Path] = []
     if explicit_path:
         p = Path(explicit_path).expanduser()
@@ -33,6 +34,7 @@ def resolve_existing_file(filename: str, explicit_path: str | Path | None = None
 
 
 def list_h5_channels(h5_path: str | Path) -> list[int]:
+    """Return sorted channel IDs that contain aligned ``time`` and ``values`` datasets."""
     channels: list[int] = []
     with h5py.File(h5_path, "r") as h5:
         for key in h5.keys():
@@ -46,6 +48,7 @@ def list_h5_channels(h5_path: str | Path) -> list[int]:
 
 
 def load_chromatogram_h5(h5_path: str | Path, channel_id: int) -> Tuple[np.ndarray, np.ndarray]:
+    """Load one chromatogram channel, validate it, and return time-sorted arrays."""
     with h5py.File(h5_path, "r") as h5:
         key = str(int(channel_id))
         if key not in h5:
@@ -94,15 +97,18 @@ def load_label_table(path: str | Path) -> pd.DataFrame:
 
 
 def labels_for_channel(labels: pd.DataFrame, channel_id: int) -> pd.DataFrame:
+    """Return only reference intervals that belong to the requested channel."""
     return labels.loc[labels["ChannelId"] == int(channel_id)].copy().reset_index(drop=True)
 
 
 def channel_label_counts(labels: pd.DataFrame) -> pd.DataFrame:
+    """Count reference intervals per channel and sort channels by count."""
     return (labels.groupby("ChannelId", as_index=False).size().rename(columns={"size": "n_labels"})
             .sort_values(["n_labels", "ChannelId"], ascending=[False, True]).reset_index(drop=True))
 
 
 def data_manifest(h5_path: str | Path, labels_path: str | Path) -> dict:
+    """Summarize signal/reference coverage so a caller can verify the loaded demo assets."""
     channels = list_h5_channels(h5_path)
     labels = load_label_table(labels_path)
     common = sorted(set(channels).intersection(labels["ChannelId"].unique()))
