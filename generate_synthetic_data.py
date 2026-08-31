@@ -20,6 +20,8 @@ REFERENCE_PATH = DATA_DIR / "synthetic_reference.xlsx"
 
 @dataclass(frozen=True)
 class PeakSpec:
+    """Describe one Gaussian component used to build a synthetic chromatogram."""
+
     center: float
     amplitude: float
     sigma: float
@@ -27,10 +29,12 @@ class PeakSpec:
 
 
 def gaussian(t: np.ndarray, center: float, amplitude: float, sigma: float) -> np.ndarray:
+    """Return a Gaussian peak evaluated at the supplied time samples."""
     return amplitude * np.exp(-0.5 * ((t - center) / sigma) ** 2)
 
 
 def make_channel(channel_id: int, seed: int) -> tuple[np.ndarray, np.ndarray, list[dict]]:
+    """Create one deterministic synthetic channel and its labeled reference intervals."""
     rng = np.random.default_rng(seed)
     t = np.linspace(0.0, 16.0, 3201)
 
@@ -58,7 +62,7 @@ def make_channel(channel_id: int, seed: int) -> tuple[np.ndarray, np.ndarray, li
         PeakSpec(12.56 + 0.10 * shift, 0.014 * scale, 0.043),
         PeakSpec(13.85 + 0.05 * shift, 0.040 * scale, 0.085),
         PeakSpec(14.72 - 0.08 * shift, 0.022 * scale, 0.055),
-        # Unlabeled artifacts to create realistic detector-only candidates.
+        # Unlabeled artifacts create realistic detector-only candidates.
         PeakSpec(7.45 + 0.03 * shift, 0.010 * scale, 0.026, label=False),
         PeakSpec(11.62 - 0.02 * shift, 0.008 * scale, 0.022, label=False),
     ]
@@ -94,12 +98,13 @@ def make_channel(channel_id: int, seed: int) -> tuple[np.ndarray, np.ndarray, li
     ripple = 0.00055 * np.sin(2 * np.pi * t * (5.5 + 0.15 * (channel_id - 1001)))
     y = clean + noise + ripple
 
-    # A deterministic injection artifact, visually useful but intentionally unlabeled.
+    # Add one deterministic injection artifact that is intentionally not labeled.
     y[80] -= 0.055 + 0.004 * (channel_id - 1001)
     return t.astype(float), y.astype(float), labels
 
 
 def generate() -> None:
+    """Write all six synthetic channels and their reference workbook to ``data/``."""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     all_labels: list[dict] = []
     with h5py.File(H5_PATH, "w") as h5:
