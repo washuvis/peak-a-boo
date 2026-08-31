@@ -16,6 +16,8 @@ from .segmentation import Segment
 
 @dataclass(slots=True)
 class PipelineResult:
+    """Collect all signal arrays, detections, evidence, and metrics from one pipeline run."""
+
     channel_id: Optional[int]
     time: np.ndarray
     raw_signal: np.ndarray
@@ -35,6 +37,12 @@ class PipelineResult:
 
 
 def run_arrays(t: np.ndarray, y_raw: np.ndarray, labels: pd.DataFrame | None = None, *, channel_id: Optional[int] = None, config: PipelineConfig | None = None) -> PipelineResult:
+    """Run preprocessing, detection, evidence scoring, stability, and reference comparison.
+
+    The same input signal is used throughout the run. Perturbation stability is
+    computed by rerunning the segment-dependent detector on noise-scaled copies
+    of the raw signal; these copies are used only for the stability calculation.
+    """
     cfg = config or PipelineConfig()
     t = np.asarray(t, dtype=float)
     y_raw = np.asarray(y_raw, dtype=float)
@@ -48,6 +56,7 @@ def run_arrays(t: np.ndarray, y_raw: np.ndarray, labels: pd.DataFrame | None = N
     final_peaks = add_weber_scores(final_peaks, cfg.scoring)
     if not final_peaks.empty:
         def detector(perturbed: np.ndarray) -> pd.DataFrame:
+            """Rerun the local detector for one perturbed signal during stability estimation."""
             smooth = moving_average(perturbed, cfg.preprocessing.smooth_window)
             _, pert_sigma, _, _ = estimate_local_noise_arrays(perturbed, smooth, cfg.preprocessing.noise_window, cfg.preprocessing.uncertainty_sigma)
             _, p, _ = detect_peaks_segmented_from_smooth(t, perturbed, smooth, pert_sigma, cfg.segmentation, cfg.detection)
@@ -63,6 +72,7 @@ def run_arrays(t: np.ndarray, y_raw: np.ndarray, labels: pd.DataFrame | None = N
 
 
 def run_pipeline(h5_path: str | Path, labels_path: str | Path, channel_id: int, *, config: PipelineConfig | None = None) -> PipelineResult:
+    """Load one channel and its references from disk, then run the full pipeline."""
     t, y = load_chromatogram_h5(h5_path, channel_id)
     labels = labels_for_channel(load_label_table(labels_path), channel_id)
     return run_arrays(t, y, labels, channel_id=channel_id, config=config)
