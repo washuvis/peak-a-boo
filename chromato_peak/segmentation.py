@@ -7,6 +7,8 @@ from .config import SegmentationConfig
 
 @dataclass(frozen=True)
 class Segment:
+    """Describe one overlapping local region used by the segment-dependent detector."""
+
     segment_id: int
     start_idx: int
     end_idx: int
@@ -16,6 +18,7 @@ class Segment:
 
 
 def make_segments(t: np.ndarray, y_smooth: np.ndarray, config: SegmentationConfig) -> list[Segment]:
+    """Create overlapping fixed-width regions and record each region's time range and baseline."""
     n = len(t)
     if n == 0:
         return []
