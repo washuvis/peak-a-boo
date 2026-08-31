@@ -1,9 +1,11 @@
 # Validation Record — Modern UI Edition
 
+Validated again on 2026-08-31 using GitHub Actions on Python 3.11.
+
 ## Static checks
 
-- Python compilation passed for `app.py` and all `chromato_peak` modules.
-- No syntax or import errors were found.
+- Python compilation passed for `app.py`, `chromato_peak/`, `tests/`, `generate_synthetic_data.py`, and `train_synthetic_ml.py`.
+- No syntax errors were reported by the CI compilation step.
 
 ## Automated tests
 
@@ -15,7 +17,7 @@ pytest -q
 
 Result:
 
-- **11 passed**
+- **11 passed in 6.95 s**
 
 Coverage includes:
 
@@ -30,30 +32,28 @@ Coverage includes:
 - live Sandbox chart updates
 - modern visual shell and circular stability UI
 
-## Interaction checks
+## Continuous integration
 
-Validated through Streamlit application testing:
+`.github/workflows/tests.yml` now runs the test suite and Python compilation on pushes, pull requests, and manual workflow dispatch.
 
-- application loads without exceptions
+## Prior interaction/runtime checks
+
+The earlier validation record also confirmed through Streamlit application testing that:
+
+- the application loads without exceptions
 - queue cues remain selectable
 - automatic focus behavior remains available
 - `Accept as reviewed` persists and displays the resolved state
 - Sandbox parameter changes update the live chart
 - navigation and export controls remain available
 
-## Runtime check
-
-The application was launched with:
+The application was previously launched with:
 
 ```bash
 streamlit run app.py --server.headless true --server.port 8611
 ```
 
-Health endpoint result:
-
-```text
-ok
-```
+with a healthy endpoint response.
 
 ## Packaging checks
 
@@ -62,8 +62,7 @@ ok
 - synthetic classifier included
 - requirements and Streamlit configuration included
 - temporary files and virtual environments excluded
-- ZIP integrity verified after packaging
 
 ## Note
 
-The bundled synthetic classifier was created with a newer scikit-learn patch version than the validation environment. Loading it produces a version warning in tests, but the synthetic-model metadata and application workflow remain valid.
+The bundled synthetic classifier may emit a scikit-learn version warning if loaded under a different patch/minor release than the one used to serialize it. The current automated tests still pass.
