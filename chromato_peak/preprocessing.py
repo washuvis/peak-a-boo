@@ -5,6 +5,7 @@ import pandas as pd
 
 
 def moving_average(y: np.ndarray, window: int) -> np.ndarray:
+    """Smooth a one-dimensional signal with a centered moving-average window."""
     y = np.asarray(y, dtype=float)
     window = max(1, int(window))
     if window == 1:
@@ -13,6 +14,7 @@ def moving_average(y: np.ndarray, window: int) -> np.ndarray:
 
 
 def estimate_local_noise_arrays(y_raw: np.ndarray, y_smooth: np.ndarray, noise_window: int, uncertainty_sigma: float) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Estimate local residual noise and return residual, sigma, and uncertainty-band arrays."""
     residual = np.asarray(y_raw, dtype=float) - np.asarray(y_smooth, dtype=float)
     window = max(5, int(noise_window))
     sigma = pd.Series(residual).rolling(window=window, center=True, min_periods=max(3, window // 4)).std(ddof=0).to_numpy(dtype=float)
@@ -25,6 +27,7 @@ def estimate_local_noise_arrays(y_raw: np.ndarray, y_smooth: np.ndarray, noise_w
 
 
 def segment_noise_summary(y_raw: np.ndarray, y_smooth: np.ndarray, sigma_t: np.ndarray) -> dict[str, float]:
+    """Summarize baseline level, local noise, and residual RMS for one segment."""
     sigma = np.asarray(sigma_t, dtype=float)
     return {
         "baseline": float(np.median(np.asarray(y_smooth, dtype=float))),
