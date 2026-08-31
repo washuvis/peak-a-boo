@@ -87,7 +87,7 @@ You need:
 - Git
 - a terminal or command prompt
 
-This repository does not currently pin one Python interpreter version. Python package versions are controlled in `requirements.txt`.
+This repository does not currently pin a specific Python interpreter version. Python package versions are controlled in `requirements.txt`.
 
 Current package ranges are:
 
