@@ -5,6 +5,13 @@ import pandas as pd
 
 
 def evaluate_peaks(peaks: pd.DataFrame, labels: pd.DataFrame | None) -> tuple[dict[str, float], pd.DataFrame, pd.DataFrame]:
+    """Match detections to reference intervals and compute TP/FP/FN summary measures.
+
+    Within each reference interval, the most prominent detected candidate is the
+    one-to-one supported match. Additional candidates in the same interval are
+    marked as over-segmentation, and intervals with no candidate are counted as
+    missed reference intervals.
+    """
     pred = peaks.copy()
     label_table = labels.copy().reset_index(drop=True) if labels is not None else pd.DataFrame(columns=["StartTime", "EndTime"])
     pred["match_status"] = "UNLABELED"
