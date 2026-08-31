@@ -13,7 +13,7 @@ from .pipeline import PipelineResult
 
 
 def _case_key(result: PipelineResult, peak_id: int, start: float, end: float) -> str:
-    """Identity tied to source analytical evidence, never to card order."""
+    """Return an identity tied to source analytical evidence, never to card order."""
     channel_id = "unknown" if result.channel_id is None else str(int(result.channel_id))
     if peak_id >= 0:
         return f"channel:{channel_id}:candidate:{peak_id}"
@@ -21,6 +21,7 @@ def _case_key(result: PipelineResult, peak_id: int, start: float, end: float) ->
 
 
 def _finite_int(value: object) -> int | None:
+    """Convert a finite numeric value to an integer, or return ``None``."""
     try:
         number = float(value)
         return int(number) if np.isfinite(number) else None
@@ -29,6 +30,7 @@ def _finite_int(value: object) -> int | None:
 
 
 def _reference_excel_row(label: pd.Series | None) -> float:
+    """Return the original Excel row retained for a reference interval."""
     if label is None:
         return np.nan
     value = label.get("_SourceExcelRow", np.nan)
@@ -49,6 +51,7 @@ def _reference_identity(label: pd.Series | None) -> tuple[str, int | None, int |
 
 
 def _source_fields(linked_label: pd.Series | None, peak_id: int, match_status: str) -> dict[str, Any]:
+    """Build provenance fields for a reference-linked case or detector-only candidate."""
     region_id, reference_peak_id, source_row = _reference_identity(linked_label)
     if linked_label is not None:
         source_status = "reference interval missed" if match_status == "FN" else "reference-linked detection"
@@ -71,6 +74,7 @@ def _source_fields(linked_label: pd.Series | None, peak_id: int, match_status: s
 
 
 def _peak_region(result: PipelineResult, row: pd.Series, title: str, review_status: str, severity: str) -> dict[str, Any]:
+    """Convert one detected candidate into a review-queue record with provenance."""
     time = float(row["time"])
     label_idx = row.get("reference_index", np.nan)
     linked_label: pd.Series | None = None
@@ -106,16 +110,16 @@ def _peak_region(result: PipelineResult, row: pd.Series, title: str, review_stat
 def build_review_queue(result: PipelineResult, max_items: int = 10) -> pd.DataFrame:
     """Create a priority queue from synthetic signal decisions and synthetic reference intervals.
 
-    Human-facing IDs are now source-grounded:
-    ``REF-###`` uses ``PeakId`` from ``synthetic_reference.xlsx`` and ``CAND-###`` uses the
-    detector candidate id computed from the synthetic HDF5 trace. No fabricated R-numbers
-    are assigned for presentation purposes.
+    Human-facing IDs are source-grounded: ``REF-###`` uses ``PeakId`` from
+    ``synthetic_reference.xlsx`` and ``CAND-###`` uses the detector candidate ID
+    computed from the synthetic HDF5 trace.
     """
     peaks = result.final_peaks.copy()
     rows: list[dict[str, Any]] = []
     used_keys: set[str] = set()
 
     def add_unique(item: dict[str, Any]) -> None:
+        """Append a case once while respecting the queue-size limit."""
         key = str(item["case_key"])
         if key not in used_keys and len(rows) < max_items:
             rows.append(item)
@@ -199,6 +203,7 @@ def apply_review_state(queue: pd.DataFrame, records: Mapping[str, Mapping[str, A
 
 
 def review_queue_counts(queue: pd.DataFrame) -> dict[str, int]:
+    """Count active, completed, and exception cases in the current review queue."""
     if queue.empty or "workflow_state" not in queue:
         return {"active": int(len(queue)), "reviewed": 0, "exceptions": 0, "total": int(len(queue))}
     state = queue["workflow_state"]
@@ -248,6 +253,7 @@ def pipeline_attribution(result: PipelineResult, selected: Mapping[str, Any] | p
 
 
 def add_audit_event(log: list[dict[str, str]], action: str, detail: str) -> None:
+    """Insert a timestamped audit event at the front of an in-memory audit list."""
     log.insert(0, {"time": datetime.now().strftime("%H:%M"), "action": action, "detail": detail})
 
 
@@ -260,6 +266,7 @@ def report_json(
     workbook_path: str | None = None,
     signal_path: str | None = None,
 ) -> str:
+    """Serialize method settings, review cases, decisions, and audit history as JSON."""
     payload = {
         "generated_at": datetime.now().isoformat(timespec="seconds"),
         "channel_id": channel_id,
