@@ -4,10 +4,6 @@ Peak-a-boo is an uncertainty-aware visual analytics workbench for reviewing chro
 
 Live demo: https://peakaboo.streamlit.app/
 
-## Status
-
-**In progress.** This repository is the public-facing Peak-a-boo workbench. The current version supports peak review, uncertainty inspection, parameter exploration, review actions, and audit records using synthetic data. The broader research project, including the expert study, is still in progress; no final peer-reviewed manuscript is linked yet.
-
 ## Introduction
 
 Chromatographic peak detectors usually return a peak/no-peak decision even when that decision may depend on smoothing, local noise, overlapping signals, or parameter choices. Peak-a-boo turns each candidate into a reviewable case. It shows the local chromatogram together with separate evidence such as detectability, perturbation stability, reference correspondence, and processing context. A Sandbox lets analysts test parameter changes without changing the main review state, and an Audit Log records review decisions and notes. The public release is intended for demonstration, interface testing, and reproducible development without distributing the original research data.
@@ -138,10 +134,9 @@ Review actions may be written to `ReviewActions` and `ReviewAuditTrail` sheets i
 
 ## Related Repositories
 
-All Peak-a-boo repositories are now under the VIBE Lab `washuvis` GitHub organization:
+The public Peak-a-boo repositories are maintained under the VIBE Lab `washuvis` GitHub organization:
 
 - [`washuvis/peak-a-boo`](https://github.com/washuvis/peak-a-boo) — this public synthetic workbench.
-- [`washuvis/chromato-peak-app`](https://github.com/washuvis/chromato-peak-app) — private internal analytical implementation containing research data and model artifacts.
 - [`washuvis/peakaboo-expert-study`](https://github.com/washuvis/peakaboo-expert-study) — expert-study application, case-bank workflow, response logging, and analysis code.
 - [`washuvis/peak-detection`](https://github.com/washuvis/peak-detection) — historical early scaffold that predates the current package structure.
 
@@ -159,17 +154,6 @@ Anyone continuing the project should first identify which repository matches the
 ## Data Use
 
 This repository contains only synthetic demonstration data. The HDF5 file, reference workbook, and classifier are not derived from the original research chromatograms or original trained model. Reference intervals are comparison evidence and should not be treated as universal chemical ground truth.
-
-## Future Works
-
-Useful continuation work includes:
-
-- complete the domain-expert evaluation of difficult peak-review cases;
-- study when disagreement among evidence sources is most useful for human oversight;
-- test whether decomposed evidence improves appropriate reliance without encouraging unnecessary rejection;
-- evaluate the approach on additional chromatography data when permissions allow;
-- identify which evidence is most useful for deciding when a candidate needs human review; and
-- keep the public workbench, private analytical implementation, and expert-study implementation aligned where their underlying methods are intended to match.
 
 ## Validation and Maintenance
 
