@@ -64,11 +64,12 @@ def test_sandbox_parameter_change_updates_live_chart():
     assert before != after
 
 
-def test_modern_visual_shell_is_present_without_changing_workflow():
+def test_research_notebook_visual_shell_is_present_without_changing_workflow():
     app = run_app()
     assert any("Synthetic review workspace" in str(block.value) for block in app.markdown)
     assert any("decision-hero" in str(block.value) for block in app.markdown)
     css = str(app.markdown[0].value)
-    assert "radial-gradient" in css
+    assert ".st-key-header_shell {background:#641F23" in css
+    assert "radial-gradient" not in css
     assert "stability-ring" in css
     assert "accept_review_action" in css
