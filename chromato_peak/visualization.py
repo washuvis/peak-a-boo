@@ -283,15 +283,15 @@ def chromatogram_figure(
     fig.update_layout(
         height=382,
         margin={"l": 12, "r": 12, "t": 18, "b": 38},
-        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#FBFCFF",
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#FFFCF7",
         showlegend=False, hovermode="closest", clickmode="event+select", dragmode="zoom",
-        font={"family": "Inter, Arial, sans-serif", "size": 12, "color": "#526581"},
+        font={"family": "Inter, Arial, sans-serif", "size": 12, "color": "#241C19"},
         xaxis={
-            "title": {"text": "Retention time (min)", "font": {"size": 11, "color": "#64748B"}},
+            "title": {"text": "Retention time (min)", "font": {"size": 11, "color": "#241C19"}},
             "gridcolor": "#E9EDF5", "zeroline": False, "showline": False, "ticks": "outside",
         },
         yaxis={
-            "title": {"text": "Signal", "font": {"size": 11, "color": "#64748B"}},
+            "title": {"text": "Signal", "font": {"size": 11, "color": "#241C19"}},
             "gridcolor": "#E9EDF5", "zeroline": False, "showline": False,
         },
         hoverlabel={"bgcolor": "#FFFFFF", "font": {"color": "#111827", "size": 12}, "bordercolor": "#C7D2FE"},
